@@ -45,7 +45,7 @@ node_templates:
           ubuntu-precise-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m3-b273.tar.gz
           windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-windows-agent_3.3.0-m3-b273_amd64.deb
         docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-docker_3.3.0-m3-b273.tar
+           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-docker-commercial_3.3.0-m3-b273.tar
 
       cloudify:
         resources_prefix: { get_input: resources_prefix }
