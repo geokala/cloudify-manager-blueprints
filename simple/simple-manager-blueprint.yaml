@@ -43,7 +43,6 @@ inputs:
   rest_service_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-manager/archive/CFY-2926-elasticsearc-index-rotation.tar.gz
-    # default: https://github.com/cloudify-cosmo/cloudify-manager/archive/3.3m3.tar.gz
 
   dsl_parser_source_url:
     type: string
@@ -65,17 +64,20 @@ inputs:
     type: string
     default: https://github.com/cloudify-cosmo/flask-securest/archive/0.6.tar.gz
 
-  amqpinflux_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/3.3m3.tar.gz
-
   agent_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m3.tar.gz
 
   diamond_plugin_source_url:
+     type: string
+     default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m3.tar.gz
+
+  #############################
+  # AMQP-influxdb Inputs
+  #############################
+  amqpinflux_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m3.tar.gz
+    default: https://github.com/geokala/cloudify-amqp-influxdb/archive/rabbitmods.tar.gz
 
   #############################
   # Java Inputs
@@ -128,6 +130,22 @@ inputs:
     type: integer
     default: 102400
 
+  rabbitmq_username:
+    type: string
+    default: testuser
+
+  rabbitmq_password:
+    type: string
+    default: testpass
+
+  rabbitmq_cert_private:
+    type: string
+    default: ''
+
+  rabbitmq_cert_public:
+    type: string
+    default: ''
+
   #############################
   # Elasticsearch Inputs
   #############################
@@ -176,6 +194,7 @@ inputs:
       ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m3-b273.tar.gz
       centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-core-agent_3.3.0-m3-b273.tar.gz
       centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-final-agent_3.3.0-m3-b273.tar.gz
+
   #############################
   # InfluxDB Inputs
   #############################
@@ -213,7 +232,6 @@ inputs:
   nodejs_source_url:
     type: string
     default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
-
 
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define

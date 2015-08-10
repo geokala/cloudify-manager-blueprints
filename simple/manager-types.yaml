@@ -114,6 +114,22 @@ node_types:
         description: RabbitMQ File Descriptors Limit
         type: integer
         default: { get_input: rabbitmq_fd_limit }
+      rabbitmq_username:
+        description: RabbitMQ username for access to queues.
+        type: string
+        default: { get_input: rabbitmq_username }
+      rabbitmq_password:
+        description: RabbitMQ password for access to queues.
+        type: string
+        default: { get_input: rabbitmq_password }
+      rabbitmq_cert_private:
+        description: PEM formatted private cert for rabbit SSL.
+        type: string
+        default: { get_input: rabbitmq_cert_private }
+      rabbitmq_cert_public:
+        description: PEM formatted public cert for rabbit SSL.
+        type: string
+        default: { get_input: rabbitmq_cert_public }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -180,6 +196,14 @@ node_types:
         description: Logstash tar.gz Source URL
         type: string
         default: { get_input: logstash_source_url }
+      rabbitmq_username:
+        description: RabbitMQ username for access to queues.
+        type: string
+        default: { get_input: rabbitmq_username }
+      rabbitmq_password:
+        description: RabbitMQ password for access to queues.
+        type: string
+        default: { get_input: rabbitmq_password }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -228,6 +252,14 @@ node_types:
         description: REST Service repo tar URL for resources
         type: string
         default: { get_input: rest_service_source_url }
+      rabbitmq_username:
+        description: RabbitMQ username for access to queues.
+        type: string
+        default: { get_input: rabbitmq_username }
+      rabbitmq_password:
+        description: RabbitMQ password for access to queues.
+        type: string
+        default: { get_input: rabbitmq_password }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -273,6 +305,14 @@ node_types:
         description: REST Service module Source URL
         type: string
         default: { get_input: rest_service_source_url }
+      rabbitmq_username:
+        description: RabbitMQ username for access to queues.
+        type: string
+        default: { get_input: rabbitmq_username }
+      rabbitmq_password:
+        description: RabbitMQ password for access to queues.
+        type: string
+        default: { get_input: rabbitmq_password }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -291,6 +331,10 @@ node_types:
   manager.nodes.RestService:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
+      amqp_ca_cert:
+        description: PEM formatted public cert for rabbit SSL.
+        type: string
+        default: { get_input: rabbitmq_cert_public }
       dsl_parser_module_source_url:
         description: DSL Parser module Source URL
         type: string
@@ -323,6 +367,14 @@ node_types:
         description: Agent module Source URL
         type: string
         default: { get_input: agent_source_url }
+      rabbitmq_username:
+        description: RabbitMQ username for access to queues.
+        type: string
+        default: { get_input: rabbitmq_username }
+      rabbitmq_password:
+        description: RabbitMQ password for access to queues.
+        type: string
+        default: { get_input: rabbitmq_password }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -369,6 +421,18 @@ node_types:
         description: Agent module Source URL
         type: string
         default: { get_input: agent_source_url }
+      rabbitmq_username:
+        description: RabbitMQ username for access to queues.
+        type: string
+        default: { get_input: rabbitmq_username }
+      rabbitmq_password:
+        description: RabbitMQ password for access to queues.
+        type: string
+        default: { get_input: rabbitmq_password }
+      rabbitmq_cert_public:
+        description: PEM formatted public cert for rabbit SSL.
+        type: string
+        default: { get_input: rabbitmq_cert_public }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -391,6 +455,18 @@ node_types:
         description: AMQP to InfluxDB Broker Source URL
         type: string
         default: { get_input: amqpinflux_source_url }
+      rabbitmq_username:
+        description: RabbitMQ username for access to queues.
+        type: string
+        default: { get_input: rabbitmq_username }
+      rabbitmq_password:
+        description: RabbitMQ password for access to queues.
+        type: string
+        default: { get_input: rabbitmq_password }
+      rabbitmq_ca_cert:
+        description: RabbitMQ public certificate for SSL. SSL not used if this is an empty string.
+        type: string
+        default: { get_input: rabbitmq_cert_public }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -512,7 +588,6 @@ relationships:
     target_interfaces:
       cloudify.interfaces.relationship_lifecycle:
         postconfigure: components/manager/scripts/set_manager_private_ip.sh
-
 
   amqpinflux_to_rabbitmq:
     derived_from: cloudify.relationships.connected_to

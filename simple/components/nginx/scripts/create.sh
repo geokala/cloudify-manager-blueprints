@@ -7,7 +7,6 @@ CONFIG_REL_PATH="components/nginx/config"
 export NGINX_SOURCE_URL=$(ctx node properties nginx_rpm_source_url)  # (e.g. "https://dl.dropboxusercontent.com/u/407576/3.2/nginx-1.8.0-1.el7.ngx.x86_64.rpm")
 export REST_SERVICE_SOURCE_URL=$(ctx node properties rest_service_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-manager/archive/3.2.tar.gz")
 
-
 export NGINX_LOG_PATH="/var/log/cloudify/nginx"
 # export NGINX_REPO="http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm"
 export MANAGER_RESOURCES_HOME="/opt/manager/resources"
@@ -18,7 +17,6 @@ export SSL_CERTS_ROOT="/root/cloudify"
 
 # this is propagated to the agent retrieval script later on so that it's not defined twice.
 ctx instance runtime_properties agent_packages_path "${MANAGER_AGENTS_PATH}"
-
 
 ctx logger info "Installing Nginx..."
 
