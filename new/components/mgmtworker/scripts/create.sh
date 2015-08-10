@@ -18,6 +18,9 @@ export VIRTUALENV_DIR="${MGMTWORKER_HOME}/env"
 export CELERY_WORK_DIR="${MGMTWORKER_HOME}/work"
 export CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 
+export RABBITMQ_USERNAME=$"(ctx node properties rabbitmq_username)"
+export RABBITMQ_PASSWORD=$"(ctx node properties rabbitmq_password)"
+export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
 
 ctx logger info "Installing Management Worker..."
 
@@ -29,10 +32,27 @@ create_dir ${CELERY_WORK_DIR}
 
 create_virtualenv "${VIRTUALENV_DIR}"
 
-# NOT SURE WE NEED THIS ANYMORE...
-# ctx logger info "Deploying mgmtworker startup script..."
-# sudo cp "components/mgmtworker/config/startup.sh" "${MGMTWORKER_HOME}/startup.sh"
-# sudo chmod +x ${MGMTWORKER_HOME}/startup.sh
+# Add certificate file
+if [[ "${RABBITMQ_CERT_PUBLIC}" =~ "BEGIN CERTIFICATE" ]]; then
+  BROKER_CERT_PATH="${MGMTWORKER_HOME}/amqp_pub.pem"
+  ctx logger info "Found public certificate for rabbitmq."
+  echo "${RABBITMQ_CERT_PUBLIC}" | sudo tee "${BROKER_CERT_PATH}" >/dev/null
+  sudo chmod 444 "${BROKER_CERT_PATH}"
+else
+  if [[ -z "${RABBITMQ_CERT_PUBLIC}" ]]; then
+    ctx logger info "No public certificate found."
+  else
+    ctx logger warn "Public certificate did not appear to be in PEM format."
+  fi
+fi
+
+if [[ -z "${BROKER_CERT_PATH}" ]]; then
+  BROKER_PORT=5672
+  BROKER_USE_SSL=""
+else
+  BROKER_PORT=5671
+  BROKER_USE_SSL="{ 'ca_certs': '${BROKER_CERT_PATH}', 'cert_reqs': $(python -c 'import ssl; print(ssl.CERT_REQUIRED)') }"
+fi
 
 ctx logger info "Installing Management Worker Modules..."
 install_module "celery==${CELERY_VERSION}" ${VIRTUALENV_DIR}
@@ -55,3 +75,8 @@ install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 
 configure_systemd_service "mgmtworker"
+inject_management_ip_as_env_var "mgmtworker"
+inject_service_env_var "{{ ctx.node.properties.rabbitmq_username }}" "${RABBITMQ_USERNAME}" "mgmtworker"
+inject_service_env_var "{{ ctx.node.properties.rabbitmq_password }}" "${RABBITMQ_PASSWORD}" "mgmtworker"
+inject_service_env_var "{{ broker_port }}" "${BROKER_PORT}" "mgmtworker"
+inject_service_env_var "{{ broker_use_ssl }}" "${BROKER_USE_SSL}" "mgmtworker"

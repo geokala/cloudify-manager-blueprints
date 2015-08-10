@@ -176,9 +176,15 @@ function yum_install
     # [yum install -y] mypackagename
     ###
     source=$1
+    package_name=${1%%.rpm}
+    package_name=${package_name##*/}
 
-    ctx logger info "yum Installing ${source}..."
-    sudo yum install -y ${source} >/dev/null
+    if rpm -qa | grep ${package_name}; then
+      ctx logger info "${source} is already installed."
+    else
+      ctx logger info "yum Installing ${source}..."
+      sudo yum install -y ${source} >/dev/null
+    fi
 }
 
 function configure_systemd_service() {
@@ -311,6 +317,7 @@ function set_selinux_permissive() {
     if [ "$(get_selinux_state)" == 'Enforcing' ]; then
         ctx logger info "SELinux is enforcing, setting SELinux Permissive State..."
         sudo setenforce Permissive
+        sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config
     else
         ctx logger info "SELinux not enforced."
     fi
@@ -325,7 +332,42 @@ function set_rabbitmq_policy() {
     queue_regex=$2
     policy_type=$3
     value=$4
-
     ctx logger info "Setting Policy ${policy_name} on queues ${queue_regex} of type ${policy_type} with value ${value}..."
     sudo rabbitmqctl set_policy ${policy_name} "${queue_regex}" "{"\"${policy_type}"\":${value}}" --apply-to queues
+}
+
+run_command_with_retries() {
+    # Logging this would be good, but would need testing to avoid accidental injection attacks from our own commands
+    ctx logger info "Attempting to run ${1} with up to 5 retries"
+    max_retries=5
+    retried=0
+    while ! ${*}; do
+        # Better logging would be good
+        ctx logger info "Command ${1} failed, retrying in 1 second."
+        retried=$(( ${retried} + 1 ))
+        sleep 1
+        if [[ ${retried} -eq ${max_retries} ]]; then
+            # Better logging would be good
+            ctx logger info "Max retries for command ${1} exceeded, aborting."
+            break
+        fi
+    done
+}
+
+run_noglob_command_with_retries() {
+    # Logging this would be good, but would need testing to avoid accidental injection attacks from our own commands
+    ctx logger info "Attempting to run ${1} with up to 5 retries"
+    max_retries=5
+    retried=0
+    while ! sh -c -f "${*}"; do
+        # Better logging would be good
+        ctx logger info "Command ${1} failed, retrying in 1 second."
+        retried=$(( ${retried} + 1 ))
+        sleep 1
+        if [[ ${retried} -eq ${max_retries} ]]; then
+            # Better logging would be good
+            ctx logger info "Max retries for command ${1} exceeded, aborting."
+            break
+        fi
+    done
 }

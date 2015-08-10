@@ -11,6 +11,8 @@ export LOGSTASH_SOURCE_URL=$(ctx node properties logstash_rpm_source_url)  # (e.
 export LOGSTASH_LOG_PATH="/var/log/cloudify/logstash"
 export LOGSTASH_CONF_PATH="/etc/logstash/conf.d"
 
+export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
+export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
 
 ctx logger info "Installing Logstash..."
 
@@ -21,6 +23,8 @@ yum_install ${LOGSTASH_SOURCE_URL}
 
 ctx logger info "Deploying Logstash conf..."
 deploy_blueprint_resource "${CONFIG_REL_PATH}/logstash.conf" "${LOGSTASH_CONF_PATH}/logstash.conf"
+replace "{{ ctx.node.properties.rabbitmq_username }}" "${RABBITMQ_USERNAME}" "${LOGSTASH_CONF_PATH}/logstash.conf"
+replace "{{ ctx.node.properties.rabbitmq_password }}" "${RABBITMQ_PASSWORD}" "${LOGSTASH_CONF_PATH}/logstash.conf"
 
 ctx logger info "Configuring logrotate..."
 lconf="/etc/logrotate.d/logstash"
