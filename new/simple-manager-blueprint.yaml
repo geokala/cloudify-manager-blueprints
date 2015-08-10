@@ -148,6 +148,22 @@ inputs:
     type: integer
     default: 102400
 
+  rabbitmq_username:
+    type: string
+    default: testuser
+
+  rabbitmq_password:
+    type: string
+    default: testpass
+
+  rabbitmq_cert_private:
+    type: string
+    default: ''
+
+  rabbitmq_cert_public:
+    type: string
+    default: ''
+
   #############################
   # Elasticsearch Inputs
   #############################
@@ -287,6 +303,9 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
+          broker_user: { get_input: rabbitmq_username }
+          broker_pass: { get_input: rabbitmq_password }
+          broker_ssl_cert: { get_input: rabbitmq_cert_public }
 
         workflows:
           task_retries: -1  # this means forever

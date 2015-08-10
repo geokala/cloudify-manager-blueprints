@@ -2,6 +2,7 @@
 
 . $(ctx download-resource "components/utils")
 
+CONFIG_REL_PATH="components/mgmtworker/config"
 
 export CELERY_VERSION=$(ctx node properties celery_version)  # (e.g. 3.1.17)
 export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.zip")
@@ -18,6 +19,12 @@ export VIRTUALENV_DIR="${MGMTWORKER_HOME}/env"
 export CELERY_WORK_DIR="${MGMTWORKER_HOME}/work"
 export CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 
+export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
+export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
+export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
+
+# Currently assuming local host, not distributed
+export MANAGEMENT_IP=$(ctx instance host_ip)
 
 ctx logger info "Installing Management Worker..."
 
@@ -29,10 +36,26 @@ create_dir ${CELERY_WORK_DIR}
 
 create_virtualenv "${VIRTUALENV_DIR}"
 
-# NOT SURE WE NEED THIS ANYMORE...
-# ctx logger info "Deploying mgmtworker startup script..."
-# sudo cp "components/mgmtworker/config/startup.sh" "${MGMTWORKER_HOME}/startup.sh"
-# sudo chmod +x ${MGMTWORKER_HOME}/startup.sh
+# Add certificate file
+if [[ "${RABBITMQ_CERT_PUBLIC}" =~ "BEGIN CERTIFICATE" ]]; then
+  BROKER_CERT_PATH="${MGMTWORKER_HOME}/amqp_pub.pem"
+  ctx logger info "Found public certificate for rabbitmq."
+  echo "${RABBITMQ_CERT_PUBLIC}" | sudo tee "${BROKER_CERT_PATH}" >/dev/null
+  sudo chmod 444 "${BROKER_CERT_PATH}"
+else
+  BROKER_CERT_PATH=""
+  if [[ -z "${RABBITMQ_CERT_PUBLIC}" ]]; then
+    ctx logger info "No public certificate found. TLS not enabled."
+  else
+    ctx logger warn "Public certificate did not appear to be in PEM format. TLS not enabled."
+  fi
+fi
+
+if [[ -z "${BROKER_CERT_PATH}" ]]; then
+  BROKER_PORT=5672
+else
+  BROKER_PORT=5671
+fi
 
 ctx logger info "Installing Management Worker Modules..."
 install_module "celery==${CELERY_VERSION}" ${VIRTUALENV_DIR}
@@ -47,11 +70,18 @@ install_module ${AGENT_SOURCE_URL} ${VIRTUALENV_DIR}
 ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Repository..."
-tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
+extract_github_archive_to_tmp ${manager_repo}
 
 ctx logger info "Installing Management Worker Plugins..."
 # shouldn't we extract the riemann-controller and workflows modules to their own repos?
 install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
+
+ctx logger info "Configuring Management worker..."
+deploy_blueprint_resource "${CONFIG_REL_PATH}/worker_conf.py" "${CELERY_WORK_DIR}/worker_conf.py"
+replace "(( broker_port ))" "${BROKER_PORT}" "${CELERY_WORK_DIR}/worker_conf.py"
+replace "(( broker_cert_path ))" "${BROKER_CERT_PATH}" "${CELERY_WORK_DIR}/worker_conf.py"
+# The config contains credentials, do not let the world read it
+chmod 440 "${CELERY_WORK_DIR}/worker_conf.py"
 
 configure_systemd_service "mgmtworker"

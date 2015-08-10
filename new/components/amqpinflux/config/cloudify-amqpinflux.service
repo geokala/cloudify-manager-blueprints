@@ -9,6 +9,8 @@ ExecStart=/opt/amqpinflux/env/bin/python /opt/amqpinflux/env/bin/cloudify-amqp-i
     --amqp-exchange cloudify-monitoring \
     --amqp-routing-key '*' \
     --amqp-hostname ${AMQP_HOST} \
+    --amqp-username "${AMQP_USERNAME}" \
+    --amqp-password "${AMQP_PASSWORD}" \
     --influx-database cloudify \
     --influx-hostname ${INFLUXDB_HOST}
 

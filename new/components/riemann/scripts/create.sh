@@ -16,7 +16,6 @@ export RIEMANN_LOG_PATH="/var/log/cloudify/riemann"
 export LANGOHR_HOME="/opt/lib"
 export EXTRA_CLASSPATH="${LANGOHR_HOME}/langohr.jar"
 
-
 ctx logger info "Installing Riemann..."
 
 copy_notice "riemann"
@@ -53,7 +52,8 @@ sudo chmod 644 $lconf
 ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Repository..."
-tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
+extract_github_archive_to_tmp ${manager_repo}
+
 ctx logger info "Deploying Riemann manager.config..."
 sudo mv "/tmp/plugins/riemann-controller/riemann_controller/resources/manager.config" "${RIEMANN_CONFIG_PATH}/conf.d/manager.config"
 
@@ -68,3 +68,6 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/main.clj" "${RIEMANN_CONFIG_PATH}/
 # we inject the management_ip for both of these to Riemann's systemd config. These should be potentially different
 # if the manager and rabbitmq are running on different hosts.
 configure_systemd_service "riemann"
+inject_management_ip_as_env_var "riemann"
+inject_service_env_var "{{ ctx.node.properties.rabbitmq_username }}" "$(ctx node properties rabbitmq_username)" "riemann"
+inject_service_env_var "{{ ctx.node.properties.rabbitmq_password }}" "$(ctx node properties rabbitmq_password)" "riemann"
