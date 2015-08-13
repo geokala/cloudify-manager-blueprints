@@ -70,7 +70,7 @@ install_module ${AGENT_SOURCE_URL} ${VIRTUALENV_DIR}
 ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Repository..."
-tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
+extract_github_archive_to_tmp ${manager_repo}
 
 ctx logger info "Installing Management Worker Plugins..."
 install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}

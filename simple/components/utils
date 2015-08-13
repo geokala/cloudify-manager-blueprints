@@ -361,3 +361,18 @@ run_noglob_command_with_retries() {
         fi
     done
 }
+
+extract_github_archive_to_tmp () {
+    if [[ "$(file ${manager_repo})" =~ 'Zip archive data' ]]; then
+        # This is a zip, unzip it, assuming it is a github style zip
+        unzip ${manager_repo} -d /tmp/github-archive-tmp > /dev/null
+        # Performing a strip-components equivalent, but the github style zips have
+        # an extra leading directory
+        # Using copy+delete to avoid errors when mv finds a target dir exists
+        cp -r /tmp/github-archive-tmp/*/* /tmp
+        rm -rf /tmp/github-archive-tmp
+    else
+        # We are expecting a tar.gz, untar it
+        tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
+    fi
+}

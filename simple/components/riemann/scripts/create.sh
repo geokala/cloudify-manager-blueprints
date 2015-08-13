@@ -52,7 +52,8 @@ sudo chmod 644 $lconf
 ctx logger info "Downloading cloudify-manager Repository..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Repository..."
-tar -xzvf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
+extract_github_archive_to_tmp ${manager_repo}
+
 ctx logger info "Deploying Riemann manager.config..."
 sudo mv "/tmp/plugins/riemann-controller/riemann_controller/resources/manager.config" "${RIEMANN_CONFIG_PATH}/conf.d/manager.config"
 

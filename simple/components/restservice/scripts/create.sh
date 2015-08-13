@@ -69,7 +69,8 @@ install_module ${AGENT_SOURCE_URL} ${REST_SERVICE_VIRTUALENV}
 # curl --fail --insecure -L ${REST_SERVICE_SOURCE_URL} --create-dirs -o /tmp/cloudify-manager/manager.tar.gz
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager..."
-tar -xzf ${manager_repo} --strip-components=1 -C "/tmp"
+extract_github_archive_to_tmp ${manager_repo}
+
 install_module "/tmp/rest-service" ${REST_SERVICE_VIRTUALENV}
 
 ctx logger info "Configuring logrotate..."
