@@ -64,7 +64,8 @@ deploy_blueprint_resource "${CONFIG_REL_PATH}/ssl/server.key" "${SSL_CERTS_ROOT}
 ctx logger info "Deploying Required Manager Resources..."
 manager_repo=$(download_file ${REST_SERVICE_SOURCE_URL})
 ctx logger info "Extracting Manager Resources to ${MANAGER_RESOURCES_HOME}..."
-tar -xzf ${manager_repo} --strip-components=1 -C "/tmp" >/dev/null
+extract_github_archive_to_tmp ${manager_repo}
+
 sudo cp -R "/tmp/resources/rest-service/cloudify/" "${MANAGER_RESOURCES_HOME}"
 
 sudo systemctl enable nginx.service &>/dev/null
