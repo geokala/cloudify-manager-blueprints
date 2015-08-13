@@ -2,6 +2,7 @@
 
 . $(ctx download-resource "components/utils")
 
+CONFIG_REL_PATH="components/mgmtworker/config"
 
 export CELERY_VERSION=$(ctx node properties celery_version)  # (e.g. 3.1.17)
 export REST_CLIENT_SOURCE_URL=$(ctx node properties rest_client_module_source_url)  # (e.g. "https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.2.zip")
@@ -18,9 +19,12 @@ export VIRTUALENV_DIR="${MGMTWORKER_HOME}/env"
 export CELERY_WORK_DIR="${MGMTWORKER_HOME}/work"
 export CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 
-export RABBITMQ_USERNAME=$"(ctx node properties rabbitmq_username)"
-export RABBITMQ_PASSWORD=$"(ctx node properties rabbitmq_password)"
+export RABBITMQ_USERNAME="$(ctx node properties rabbitmq_username)"
+export RABBITMQ_PASSWORD="$(ctx node properties rabbitmq_password)"
 export RABBITMQ_CERT_PUBLIC="$(ctx node properties rabbitmq_cert_public)"
+
+# Currently assuming local host, not distributed
+export MANAGEMENT_IP=$(ctx instance host_ip)
 
 ctx logger info "Installing Management Worker..."
 
@@ -39,19 +43,18 @@ if [[ "${RABBITMQ_CERT_PUBLIC}" =~ "BEGIN CERTIFICATE" ]]; then
   echo "${RABBITMQ_CERT_PUBLIC}" | sudo tee "${BROKER_CERT_PATH}" >/dev/null
   sudo chmod 444 "${BROKER_CERT_PATH}"
 else
+  BROKER_CERT_PATH=""
   if [[ -z "${RABBITMQ_CERT_PUBLIC}" ]]; then
-    ctx logger info "No public certificate found."
+    ctx logger info "No public certificate found. TLS not enabled."
   else
-    ctx logger warn "Public certificate did not appear to be in PEM format."
+    ctx logger warn "Public certificate did not appear to be in PEM format. TLS not enabled."
   fi
 fi
 
 if [[ -z "${BROKER_CERT_PATH}" ]]; then
   BROKER_PORT=5672
-  BROKER_USE_SSL=""
 else
   BROKER_PORT=5671
-  BROKER_USE_SSL="{ 'ca_certs': '${BROKER_CERT_PATH}', 'cert_reqs': $(python -c 'import ssl; print(ssl.CERT_REQUIRED)') }"
 fi
 
 ctx logger info "Installing Management Worker Modules..."
@@ -73,9 +76,15 @@ ctx logger info "Installing Management Worker Plugins..."
 install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 
+ctx logger info "Configuring Management worker..."
+deploy_file "${CONFIG_REL_PATH}/worker_conf.py" "${CELERY_WORK_DIR}/worker_conf.py"
+replace "{{ ctx.node.properties.rabbitmq_username }}" "${RABBITMQ_USERNAME}" "${CELERY_WORK_DIR}/worker_conf.py"
+replace "{{ ctx.node.properties.rabbitmq_password }}" "${RABBITMQ_PASSWORD}" "${CELERY_WORK_DIR}/worker_conf.py"
+replace "{{ ctx.instance.runtime_properties.manager_host_ip }}" "${MANAGEMENT_IP}" "${CELERY_WORK_DIR}/worker_conf.py"
+replace "{{ broker_port }}" "${BROKER_PORT}" "${CELERY_WORK_DIR}/worker_conf.py"
+replace "{{ broker_cert_path }}" "${BROKER_CERT_PATH}" "${CELERY_WORK_DIR}/worker_conf.py"
+# The config contains credentials, do not let the world read it
+chmod 440 "${CELERY_WORK_DIR}/worker_conf.py"
+
 configure_systemd_service "mgmtworker"
 inject_management_ip_as_env_var "mgmtworker"
-inject_service_env_var "{{ ctx.node.properties.rabbitmq_username }}" "${RABBITMQ_USERNAME}" "mgmtworker"
-inject_service_env_var "{{ ctx.node.properties.rabbitmq_password }}" "${RABBITMQ_PASSWORD}" "mgmtworker"
-inject_service_env_var "{{ broker_port }}" "${BROKER_PORT}" "mgmtworker"
-inject_service_env_var "{{ broker_use_ssl }}" "${BROKER_USE_SSL}" "mgmtworker"
