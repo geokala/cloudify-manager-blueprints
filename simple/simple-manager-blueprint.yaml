@@ -132,11 +132,11 @@ inputs:
 
   rabbitmq_username:
     type: string
-    default: testuser
+    default: guest
 
   rabbitmq_password:
     type: string
-    default: testpass
+    default: guest
 
   rabbitmq_cert_private:
     type: string
@@ -275,6 +275,9 @@ node_templates:
           max_workers: 5
           remote_execution_port: 22
           user: { get_input: agents_user }
+          broker_user: { get_input: rabbitmq_username }
+          broker_pass: { get_input: rabbitmq_password }
+          broker_ssl_cert: { get_input: rabbitmq_cert_public }
 
         workflows:
           task_retries: -1  # this means forever
