@@ -148,6 +148,22 @@ inputs:
     type: integer
     default: 102400
 
+  rabbitmq_username:
+    type: string
+    default: testuser
+
+  rabbitmq_password:
+    type: string
+    default: testpass
+
+  rabbitmq_cert_private:
+    type: string
+    default: ''
+
+  rabbitmq_cert_public:
+    type: string
+    default: ''
+
   #############################
   # Elasticsearch Inputs
   #############################
