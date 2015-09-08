@@ -1,12 +1,18 @@
-tosca_definitions_version: cloudify_dsl_1_0
+tosca_definitions_version: cloudify_dsl_1_1
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.3m4/types.yaml
   - http://www.getcloudify.org/spec/fabric-plugin/1.3m4/plugin.yaml
+  - types/manager-types.yaml
+
+
 
 
 inputs:
 
+  #############################
+  # Provider specific Inputs
+  #############################
   public_ip:
     type: string
 
@@ -36,49 +42,45 @@ inputs:
 
   rest_service_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/CFY-2926-elasticsearc-index-rotation.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-manager/archive/master.tar.gz
 
   dsl_parser_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-dsl-parser/archive/master.tar.gz
 
   rest_client_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-rest-client/archive/master.tar.gz
 
   plugins_common_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/3.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-plugins-common/archive/master.tar.gz
 
   script_plugin_source_url:
     type: string
-    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/1.3m3.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-script-plugin/archive/master.tar.gz
 
   securest_source_url:
     type: string
     default: https://github.com/cloudify-cosmo/flask-securest/archive/0.6.tar.gz
 
-  agent_source_url:
-    type: string
-    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/3.3m3.tar.gz
-
-  diamond_plugin_source_url:
-     type: string
-     default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/1.3m3.tar.gz
-
-  #############################
-  # AMQP-influxdb Inputs
-  #############################
   amqpinflux_source_url:
     type: string
-    default: https://github.com/geokala/cloudify-amqp-influxdb/archive/rabbitmods.tar.gz
+    default: https://github.com/cloudify-cosmo/cloudify-amqp-influxdb/archive/master.tar.gz
+
+  agent_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-agent/archive/master.tar.gz
+
+  diamond_plugin_source_url:
+    type: string
+    default: https://github.com/cloudify-cosmo/cloudify-diamond-plugin/archive/master.tar.gz
 
   #############################
   # Java Inputs
   #############################
   java_source_url:
     type: string
-    # default: http://javadl.sun.com/webapps/download/AutoDL?BundleId=106239
     default: https://dl.dropboxusercontent.com/u/407576/3.2/java.rpm
 
   #############################
@@ -93,14 +95,23 @@ inputs:
     default: http://www.rabbitmq.com/releases/rabbitmq-server/v3.5.3/rabbitmq-server-3.5.3-1.noarch.rpm
 
   rabbitmq_events_queue_message_ttl:
+    description: >
+      Sets the number of milliseconds to wait before a message expires
+      in the events queue.
     type: integer
     default: 60000
 
   rabbitmq_logs_queue_message_ttl:
+    description: >
+      Sets the number of milliseconds to wait before a message expires
+      in the logs queue.
     type: integer
     default: 60000
 
   rabbitmq_metrics_queue_message_ttl:
+    description: >
+      Sets the number of milliseconds to wait before a message expires
+      in the metrics queues.
     type: integer
     default: 60000
 
@@ -109,36 +120,33 @@ inputs:
   # limit is reached!
   # https://www.rabbitmq.com/maxlength.html
   rabbitmq_events_queue_length_limit:
+    description: >
+      Sets the number of messages the logs queue can hold.
+      Note this is NOT the message byte length!
     type: integer
     default: 1000000
 
   rabbitmq_logs_queue_length_limit:
+    description: >
+      Sets the number of messages the logs queue can hold.
+      Note this is NOT the message byte length!
     type: integer
     default: 1000000
 
   rabbitmq_metrics_queue_length_limit:
+    description: >
+      Sets the number of messages the metrics queues can hold.
+      This applies to both the queue that amqp-influx pulls from and
+      the ones Riemann pulls from.
+      Note this is NOT the message byte length!
     type: integer
     default: 1000000
 
   rabbitmq_fd_limit:
+    description: >
+      Sets the File Descriptor limit for the rabbitmq user.
     type: integer
     default: 102400
-
-  rabbitmq_username:
-    type: string
-    default: testuser
-
-  rabbitmq_password:
-    type: string
-    default: testpass
-
-  rabbitmq_cert_private:
-    type: string
-    default: ''
-
-  rabbitmq_cert_public:
-    type: string
-    default: ''
 
   #############################
   # Elasticsearch Inputs
@@ -152,15 +160,20 @@ inputs:
     type: string
     default: "2g"
 
-  # This allows to provide any JAVA_OPTS to Elasticsearch.
   elasticsearch_java_opts:
+    description: >
+      Provide any JAVA_OPTS to Elasticsearch.
     type: string
     default: ''
 
-  # The index for events will be named `logstash-YYYY.mm.dd`.
+  # The index for events/logs will be named `logstash-YYYY.mm.dd` and
+  # A new index corresponding with today's date will be added each day.
   # Elasticsearch Curator is used to rotate the indices on a daily basis
-  # via a cronjob. This allows to determine the number of days to keep.
-  elasticsearch_index_rotation_day_count:
+  # via a cronjob.
+  # https://www.elastic.co/blog/curator-tending-your-time-series-indices
+  elasticsearch_index_rotation_interval:
+    description: >
+      Determines the number of days to keep.
     type: integer
     default: 7
 
@@ -184,10 +197,10 @@ inputs:
   # agent installer to identify it for your distro and release automatically.
   agent_package_urls:
     default:
-      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-trusty-agent_3.3.0-m3-b273.tar.gz
-      ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m3-b273.tar.gz
-      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-core-agent_3.3.0-m3-b273.tar.gz
-      centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m3-RELEASE/cloudify-centos-final-agent_3.3.0-m3-b273.tar.gz
+      ubuntu_trusty_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/Ubuntu-trusty-agent_3.3.0-m4-b274.tar.gz
+      # ubuntu_precise_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-ubuntu-precise-agent_3.3.0-m4-b274.tar.gz
+      centos_core_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/centos-Core-agent_3.3.0-m4-b274.tar.gz
+      # centos_final_agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-centos-final-agent_3.3.0-m4-b274.tar.gz
 
   #############################
   # InfluxDB Inputs
@@ -216,16 +229,17 @@ inputs:
   #############################
   webui_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/cosmo-ui-3.2.0.tgz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/cosmo-ui-3.3.0-m3.tgz
 
   # This is a Cloudify specific redistribution of Grafana.
   grafana_source_url:
     type: string
-    default: https://dl.dropboxusercontent.com/u/407576/grafana-1.9.0.tgz
+    default: https://dl.dropboxusercontent.com/u/407576/3.3/grafana-1.9.0.tgz
 
   nodejs_source_url:
     type: string
     default: http://nodejs.org/dist/v0.10.35/node-v0.10.35-linux-x64.tar.gz
+
 
 ######################################################################
 # This is a simple blueprint specific node_type to allow us to define
@@ -246,23 +260,21 @@ node_types:
 ######################################################################
 node_templates:
   manager_host:
-    type: cloudify.nodes.Compute
+    type: cloudify.nodes.ManagerHost
     properties:
       install_agent: false
-      ip: { get_input: public_ip }
+      ip: { get_input: private_ip }
 
-  manager:
-    type: cloudify.nodes.CloudifyManager
+  # #####################################################################
+  # The manager_configuration node is meant to be read by Cloudify to
+  # provide runtime configuration and information for the CLI and the
+  # Manager.
+  # #####################################################################
+  manager_configuration:
+    type: cloudify.nodes.MyCloudifyManager
     properties:
-      cloudify_packages:
-        agents:
-          ubuntu-trusty-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/Ubuntu-trusty-agent_3.3.0-m4-b274.tar.gz
-          centos-final-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/centos-Final-agent_3.3.0-m4-b274.tar.gz
-          ubuntu-precise-agent: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/Ubuntu-precise-agent_3.3.0-m4-b274.tar.gz
-          windows_agent_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-windows-agent_3.3.0-m4-b274.exe
-        docker:
-           docker_url: http://gigaspaces-repository-eu.s3.amazonaws.com/org/cloudify3/3.3.0/m4-RELEASE/cloudify-docker_3.3.0-m4-b274.tar
-
+      ssh_user: { get_input: ssh_user }
+      ssh_key_filename: { get_input: ssh_key_filename }
       cloudify:
         resources_prefix: { get_input: resources_prefix }
 
@@ -283,41 +295,171 @@ node_templates:
         policy_engine:
           start_timeout: 30
 
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: fabric.fabric_plugin.tasks.run_script
+          inputs:
+            script_path: components/manager/scripts/configure_manager.sh
+            fabric_env:
+              user: { get_input: ssh_user }
+              key_filename: { get_input: ssh_key_filename }
+              host_string: { get_property: [manager_host, public_ip] }
+              always_use_pty: true
+
     relationships:
       - type: cloudify.relationships.contained_in
         target: manager_host
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        start:
-          implementation: fabric.fabric_plugin.tasks.run_module_task
-          inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.bootstrap_docker
-            task_properties:
-              cloudify_packages: { get_property: [manager, cloudify_packages] }
-              agent_local_key_path: { get_input: ssh_key_filename }
-              manager_private_ip: { get_input: private_ip }
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-        stop:
-          implementation: fabric.fabric_plugin.tasks.run_module_task
-          inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.stop_manager_container
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-        delete:
-          implementation: fabric.fabric_plugin.tasks.run_module_task
-          inputs:
-            task_mapping: cloudify_cli.bootstrap.tasks.stop_docker_service
-            fabric_env:
-              user: { get_input: ssh_user }
-              key_filename: { get_input: ssh_key_filename }
-      cloudify.interfaces.validation:
-        creation:
-          implementation: cli.cloudify_cli.bootstrap.tasks.creation_validation
-          inputs:
-            cloudify_packages: { get_property: [manager, cloudify_packages] }
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure: components/manager/scripts/set_manager_public_ip.sh
+      - type: cloudify.relationships.depends_on
+        target: rest_service
+      - type: cloudify.relationships.depends_on
+        target: nginx
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            postconfigure: components/manager/scripts/set_manager_private_ip.sh
+
+  # #####################################################################
+  # The Python and Java nodes are used to provide runtime environments
+  # on specific hosts. It allows us to define the runtime environment
+  # and install it only once per host and then have a node depend on it.
+  # Note that Erlang and NodeJS are also installed as runtime envs as
+  # part of the RabbitMQ and WebUI nodes respectively but as they're not
+  # used by multiple nodes, we're not specifying them as independent
+  # entities.
+  # #####################################################################
+  python_runtime:
+    type: manager.nodes.PythonRuntime
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
+  java_runtime:
+    type: manager.nodes.JavaRuntime
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
+  ######################################################################
+  # These are the nodes comprising the Cloudify Manager's components
+  ######################################################################
+  rabbitmq:
+    type: manager.nodes.RabbitMQ
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
+  elasticsearch:
+    type: manager.nodes.Elasticsearch
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
+
+  logstash:
+    type: manager.nodes.Logstash
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
+      - type: logstash_to_elasticsearch
+        target: elasticsearch
+
+  influxdb:
+    type: manager.nodes.InfluxDB
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+
+  nginx:
+    type: manager.nodes.Nginx
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      # circular relationship
+      # - type: nginx_to_webui
+      #   target: webui
+      - type: nginx_to_restservice
+        target: rest_service
+
+  riemann:
+    type: manager.nodes.Riemann
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: java_runtime
+      - type: riemann_to_rabbitmq
+        target: rabbitmq
+      - type: riemann_to_nginx
+        target: nginx
+
+  rest_service:
+    type: manager.nodes.RestService
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: restservice_to_elasticsearch
+        target: elasticsearch
+      - type: restservice_to_rabbitmq
+        target: rabbitmq
+
+  mgmt_worker:
+    type: manager.nodes.ManagementWorker
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: mgmtworker_to_rabbitmq
+        target: rabbitmq
+      - type: mgmtworker_to_nginx
+        target: nginx
+
+  amqp_influx:
+    type: manager.nodes.AmqpInfluxBroker
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      - type: cloudify.relationships.depends_on
+        target: python_runtime
+      - type: amqpinflux_to_rabbitmq
+        target: rabbitmq
+      - type: amqpinflux_to_influxdb
+        target: influxdb
+
+  webui:
+    type: manager.nodes.WebUI
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: manager_host
+      # circular relationship
+      # - type: webui_to_nginx
+      #   target: nginx
+      - type: webui_to_influxdb
+        target: influxdb
+
+  ######################################################################
+  # Enable this node if you want to have the CLI installed within
+  # the manager. This might aid in debugging problems or just
+  # controlling the manager from within itself.
+  ######################################################################
+  # cli:
+  #   type: manager.nodes.CLI
+  #   relationships:
+  #     - type: cloudify.relationships.contained_in
+  #       target: manager_host
+  #     - type: cloudify.relationships.depends_on
+  #       target: nginx
+  #     - type: cloudify.relationships.depends_on
+  #       target: restservice
+
 
 plugins:
   cli:
