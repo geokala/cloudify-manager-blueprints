@@ -78,7 +78,7 @@ install_module "/tmp/plugins/riemann-controller" ${VIRTUALENV_DIR}
 install_module "/tmp/workflows" ${VIRTUALENV_DIR}
 
 ctx logger info "Configuring Management worker..."
-deploy_file "${CONFIG_REL_PATH}/worker_conf.py" "${CELERY_WORK_DIR}/worker_conf.py"
+deploy_blueprint_resource "${CONFIG_REL_PATH}/worker_conf.py" "${CELERY_WORK_DIR}/worker_conf.py"
 replace "{{ ctx.node.properties.rabbitmq_username }}" "${RABBITMQ_USERNAME}" "${CELERY_WORK_DIR}/worker_conf.py"
 replace "{{ ctx.node.properties.rabbitmq_password }}" "${RABBITMQ_PASSWORD}" "${CELERY_WORK_DIR}/worker_conf.py"
 replace "{{ ctx.instance.runtime_properties.manager_host_ip }}" "${MANAGEMENT_IP}" "${CELERY_WORK_DIR}/worker_conf.py"
