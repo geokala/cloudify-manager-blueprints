@@ -95,9 +95,7 @@ sudo chmod 644 $lconf
 
 ctx logger info "Deploying Gunicorn and REST Service Configuration file..."
 deploy_blueprint_resource "${CONFIG_REL_PATH}/guni.conf" "${REST_SERVICE_HOME}/guni.conf"
-replace "{{ ctx.node.properties.rabbitmq_username }}" "${RABBITMQ_USERNAME}" "${REST_SERVICE_HOME}/guni.conf"
-replace "{{ ctx.node.properties.rabbitmq_password }}" "${RABBITMQ_PASSWORD}" "${REST_SERVICE_HOME}/guni.conf"
-replace "{{ amqp_ca_cert }}" "${AMQP_CERT_PATH}" "${REST_SERVICE_HOME}/guni.conf"
-replace "{{ amqp_port }}" "${AMQP_PORT}" "${REST_SERVICE_HOME}/guni.conf"
+replace "(( amqp_ca_cert ))" "${AMQP_CERT_PATH}" "${REST_SERVICE_HOME}/guni.conf"
+replace "(( amqp_port ))" "${AMQP_PORT}" "${REST_SERVICE_HOME}/guni.conf"
 
 configure_systemd_service "restservice"
