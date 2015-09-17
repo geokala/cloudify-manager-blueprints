@@ -28,15 +28,8 @@ else
   fi
 fi
 
-if [[ -z "${AMQP_CERT_PATH}" ]]; then
-  AMQP_PORT="5672"
-else
-  AMQP_PORT="5671"
-fi
-
 copy_notice "amqpinflux"
 create_virtualenv "${AMQPINFLUX_VIRTUALENV_DIR}"
 install_module ${AMQPINFLUX_SOURCE_URL} "${AMQPINFLUX_VIRTUALENV_DIR}"
 configure_systemd_service "amqpinflux"
 inject_service_env_var "(( amqp_cert_path ))" "${AMQP_CERT_PATH}" "amqpinflux"
-inject_service_env_var "(( amqp_port ))" "${AMQP_PORT}" "amqpinflux"
