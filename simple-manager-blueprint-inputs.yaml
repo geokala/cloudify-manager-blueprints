@@ -110,7 +110,6 @@
 
 #rest_service_rpm_source_url: ''
 #management_worker_rpm_source_url: ''
-#amqpinflux_rpm_source_url: ''
 #cloudify_resources_url: ''
 #webui_source_url: ''
 
@@ -136,7 +135,6 @@
 
 #logstash_source_url: ''
 #nginx_source_url: ''
-#influxdb_source_url: ''
 
 #riemann_source_url: ''
 # A RabbitMQ Client for Riemann
@@ -247,16 +245,6 @@
 # You can configure the PostgreSQL database name for cloudify
 #postgresql_db_name: 'cloudify_db'
 #postgresql_host: 'localhost'
-
-#############################
-# InfluxDB Configuration
-#############################
-# You can configure an external endpoint of an InfluxDB Cluster to use
-# instead of the built in one.
-# If one is provided, the built in InfluxDB cluster will not run.
-# Note that the port is currently not configurable and must remain 8086.
-# Also note that the database username and password are hardcoded to root:root.
-#influxdb_endpoint_ip: ''
 
 #################################
 # Management Worker Configuration

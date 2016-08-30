@@ -24,10 +24,6 @@ def install_webui():
     webui_source_url = ctx_properties['webui_tar_source_url']
     grafana_source_url = ctx_properties['grafana_tar_source_url']
 
-    # injected as an input to the script
-    ctx.instance.runtime_properties['influxdb_endpoint_ip'] = \
-        os.environ.get('INFLUXDB_ENDPOINT_IP')
-
     # is this a telecom edition?
     ctx.instance.runtime_properties['ui_variation'] = \
         'telecom' if ctx_properties.get('telecom_edition') else ''

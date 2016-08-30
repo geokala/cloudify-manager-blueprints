@@ -293,24 +293,6 @@ node_templates:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  influxdb:
-    type: manager.nodes.InfluxDB
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/influxdb/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   nginx:
     type: manager.nodes.Nginx
     relationships:
@@ -405,30 +387,6 @@ node_templates:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  amqp_influx:
-    type: manager.nodes.AmqpInfluxBroker
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: python_runtime
-      - type: amqpinflux_to_rabbitmq
-        target: rabbitmq
-      - type: amqpinflux_to_influxdb
-        target: influxdb
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/amqpinflux/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   webui:
     type: manager.nodes.WebUI
     relationships:
@@ -436,8 +394,6 @@ node_templates:
         target: manager_host
       - type: webui_to_restservice
         target: rest_service
-      - type: webui_to_influxdb
-        target: influxdb
 
   #################################
   # Sanity
@@ -460,8 +416,6 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: logstash
       - type: cloudify.relationships.depends_on
-        target: influxdb
-      - type: cloudify.relationships.depends_on
         target: nginx
       - type: cloudify.relationships.depends_on
         target: riemann
@@ -471,8 +425,6 @@ node_templates:
         target: mgmt_worker
       - type: cloudify.relationships.depends_on
         target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: amqp_influx
 
   ######################################################################
   # Enable this node if you want to have the CLI installed within
