@@ -502,44 +502,6 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  manager.nodes.InfluxDB:
-    derived_from: cloudify.nodes.DBMS
-    properties:
-      influxdb_rpm_source_url:
-        description: InfluxDB RPM Source URL
-        type: string
-        default: { get_input: influxdb_source_url }
-      influxdb_endpoint_ip:
-        type: string
-        default: { get_input: influxdb_endpoint_ip }
-      use_existing_on_upgrade:
-        description: Use existing influxdb configuration
-        type: string
-        default: true
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/influxdb/scripts/create.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-        start:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/influxdb/scripts/start.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-        stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/influxdb/scripts/stop.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
@@ -869,67 +831,6 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  manager.nodes.AmqpInfluxBroker:
-    derived_from: cloudify.nodes.ApplicationModule
-    properties:
-      amqpinflux_rpm_source_url:
-        description: AMQP to InfluxDB Broker RPM Source URL
-        type: string
-        default: { get_input: amqpinflux_rpm_source_url }
-      amqpinflux_module_source_url:
-        description: AMQP to InfluxDB Broker Source URL
-        type: string
-        default: { get_input: amqpinflux_source_url }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
-      rabbitmq_username:
-        description: RabbitMQ username for access to queues.
-        type: string
-        default: { get_input: rabbitmq_username }
-      rabbitmq_password:
-        description: RabbitMQ password for access to queues.
-        type: string
-        default: { get_input: rabbitmq_password }
-      rabbitmq_ssl_enabled:
-        description: Set whether SSL should be enabled for Rabbit.
-        type: boolean
-        default: { get_input: rabbitmq_ssl_enabled }
-      rabbitmq_cert_public:
-        description: RabbitMQ public certificate for SSL. SSL not used if this is an empty string.
-        type: string
-        default: { get_input: rabbitmq_cert_public }
-      use_existing_on_upgrade:
-        description: Use existing amqp influx configuration
-        type: string
-        default: true
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/amqpinflux/scripts/create.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-            INFLUXDB_ENDPOINT_IP:
-              default: { get_attribute: [influxdb, influxdb_endpoint_ip] }
-        start:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/amqpinflux/scripts/start.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-        stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/amqpinflux/scripts/stop.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   manager.nodes.WebUI:
     derived_from: cloudify.nodes.ApplicationModule
     properties:
@@ -962,8 +863,6 @@ node_types:
               default: components/webui/scripts/create.py
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
-            INFLUXDB_ENDPOINT_IP:
-              default: { get_attribute: [influxdb, influxdb_endpoint_ip] }
         start:
           implementation: fabric.fabric_plugin.tasks.run_script
           inputs:
@@ -1160,16 +1059,7 @@ relationships:
         postconfigure:
          implementation: components/manager/scripts/sanity/get_rest_protocol.py
 
-  amqpinflux_to_rabbitmq:
-    derived_from: cloudify.relationships.connected_to
-
-  amqpinflux_to_influxdb:
-    derived_from: cloudify.relationships.connected_to
-
   restservice_to_rabbitmq:
-    derived_from: cloudify.relationships.connected_to
-
-  webui_to_influxdb:
     derived_from: cloudify.relationships.connected_to
 
   webui_to_restservice:

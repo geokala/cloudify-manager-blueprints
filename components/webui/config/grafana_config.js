@@ -25,12 +25,6 @@ define(['settings'],
                     url: "/backend/grafana",
                     grafanaDB: true
                 }
-//                ,influxdb: {
-//                    type: 'influxdb',
-//                    url: "http://54.74.70.218:8086/db/influxdb",
-//                    username: 'root',
-//                    password: 'W5T&w!S9Y1K1'
-//                }
             },
 
             // Graphite & Elasticsearch example setup

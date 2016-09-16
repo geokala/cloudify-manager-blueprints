@@ -124,10 +124,6 @@ inputs:
     type: string
     default: cloudify-management-worker-4.0.0-m2_b462.x86_64.rpm
 
-  amqpinflux_rpm_source_url:
-    type: string
-    default: cloudify-amqp-influx-4.0.0-m2_b462.x86_64.rpm
-
   cloudify_resources_url:
     type: string
     default: cloudify-manager-4.0m2.tar.gz
@@ -203,10 +199,6 @@ inputs:
   nginx_source_url:
     type: string
     default: nginx-1.8.0-1.el7.ngx.x86_64.rpm
-
-  influxdb_source_url:
-    type: string
-    default: influxdb-0.8.8-1.x86_64.rpm
 
   langohr_source_url:
     type: string
@@ -325,6 +317,7 @@ inputs:
 
   rabbitmq_metrics_queue_length_limit:
     description: >
+      # TODO: Remove when riemann gone
       Sets the number of messages the metrics queues can hold.
       This applies to both the queue that amqp-influx pulls from and
       the ones Riemann pulls from.
@@ -438,15 +431,6 @@ inputs:
     default: ''
 
   #############################
-  # InfluxDB Inputs
-  #############################
-  influxdb_endpoint_ip:
-    description: >
-      An IP Endpoint of your InfluxDB Cluster.
-    type: string
-    default: ''
-
-  #############################
   # Management Worker Inputs
   #############################
   management_worker_log_level:
@@ -503,7 +487,7 @@ inputs:
     type: string
     default: ''
 
-  amqpinflux_source_url:
+  securest_source_url:
     type: string
     default: ''
 
