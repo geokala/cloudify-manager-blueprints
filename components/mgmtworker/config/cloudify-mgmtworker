@@ -3,7 +3,6 @@ VIRTUALENV_DIR="/opt/mgmtworker/env"
 CELERY_WORK_DIR="/opt/mgmtworker/work"
 CELERY_LOG_DIR="/var/log/cloudify/mgmtworker"
 CELERY_LOG_LEVEL="{{ node.properties.log_level }}"
-RIEMANN_CONFIGS_DIR="/opt/riemann"
 MANAGEMENT_USER="root"
 REST_HOST= {{ ctx.instance.runtime_properties.rest_host }}
 REST_PORT={{ ctx.instance.runtime_properties.rest_port }}

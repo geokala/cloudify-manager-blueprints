@@ -211,10 +211,6 @@ inputs:
     type: string
     default: daemonize-1.7.3-7.el7.x86_64.rpm
 
-  riemann_source_url:
-    type: string
-    default: riemann-0.2.6-1.noarch.rpm
-
   nodejs_source_url:
     type: string
     default: node-v0.10.35-linux-x64.tar.gz
@@ -313,17 +309,6 @@ inputs:
   rabbitmq_logs_queue_length_limit:
     description: >
       Sets the number of messages the logs queue can hold.
-      Note this is NOT the message byte length!
-      Not used if an external endpoint is used.
-    type: integer
-    default: 1000000
-
-  rabbitmq_metrics_queue_length_limit:
-    description: >
-      (will be removed when riemann is removed as well presumably)
-      Sets the number of messages the metrics queues can hold.
-      This applies to both the queue that amqp-mangledflux pulls from and
-      the ones Riemann pulls from.
       Note this is NOT the message byte length!
       Not used if an external endpoint is used.
     type: integer

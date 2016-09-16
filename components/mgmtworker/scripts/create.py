@@ -50,10 +50,6 @@ def _install_optional(mgmtworker_venv):
         utils.untar(manager_repo)
 
         ctx.logger.info('Installing Management Worker Plugins...')
-        # shouldn't we extract the riemann-controller and workflows modules to
-        # their own repos?
-        utils.install_python_package(
-            '/tmp/plugins/riemann-controller', mgmtworker_venv)
         utils.install_python_package('/tmp/workflows', mgmtworker_venv)
 
 

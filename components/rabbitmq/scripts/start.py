@@ -65,8 +65,6 @@ if not rabbitmq_endpoint_ip:
         'rabbitmq_events_queue_length_limit']
     logs_queue_length_limit = ctx_properties[
         'rabbitmq_logs_queue_length_limit']
-    metrics_queue_length_limit = ctx_properties[
-        'rabbitmq_metrics_queue_length_limit']
 
     utils.wait_for_port(5672)
     time.sleep(10)
@@ -79,14 +77,6 @@ if not rabbitmq_endpoint_ip:
         'message-ttl': events_queue_message_ttl,
         'max-length': events_queue_length_limit
     }
-    metrics_queue_message_policy = {
-        'message-ttl': metrics_queue_message_ttl,
-        'max-length': metrics_queue_length_limit
-    }
-    riemann_deployment_queues_message_ttl = {
-        'message-ttl': metrics_queue_message_ttl,
-        'max-length': metrics_queue_length_limit
-    }
 
     ctx.logger.info("Setting RabbitMQ Policies...")
     set_rabbitmq_policy(
@@ -98,16 +88,6 @@ if not rabbitmq_endpoint_ip:
         name='events_queue_message_policy',
         expression='^cloudify-events$',
         policy=events_queue_message_policy
-    )
-    set_rabbitmq_policy(
-        name='metrics_queue_message_policy',
-        expression='^amq\.gen.*$',
-        policy=metrics_queue_message_policy
-    )
-    set_rabbitmq_policy(
-        name='riemann_deployment_queues_message_ttl',
-        expression='^.*-riemann$',
-        policy=riemann_deployment_queues_message_ttl
     )
 
     # rabbitmq restart exits with 143 status code that is valid in this case.

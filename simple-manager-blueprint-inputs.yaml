@@ -136,12 +136,6 @@
 #logstash_source_url: ''
 #nginx_source_url: ''
 
-#riemann_source_url: ''
-# A RabbitMQ Client for Riemann
-#langohr_source_url: ''
-# Riemann's default daemonizer
-#daemonize_source_url: ''
-
 #nodejs_source_url: ''
 
 ##################################
