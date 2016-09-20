@@ -18,7 +18,6 @@ define(['settings'],
              *  - basic authentication: use url syntax http://username:password@domain:port
              */
 
-            // InfluxDB example setup (the InfluxDB databases specified need to exist)
             datasources: {
                 cloudify: {
                     type: 'cloudify',

@@ -597,16 +597,6 @@ node_templates:
       - type: logstash_to_elasticsearch
         target: elasticsearch
 
-  influxdb:
-    type: manager.nodes.InfluxDB
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-
   nginx:
     type: manager.nodes.Nginx
     relationships:
@@ -618,22 +608,6 @@ node_templates:
         target: rest_service
       - type: nginx_to_manager_configuration
         target: manager_configuration
-
-  riemann:
-    type: manager.nodes.Riemann
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: java_runtime
-      - type: riemann_to_manager_configuration
-        target: manager_configuration
-      - type: riemann_to_rabbitmq
-        target: rabbitmq
-      - type: riemann_to_nginx
-        target: nginx
 
   rest_service:
     type: manager.nodes.RestService
@@ -669,22 +643,6 @@ node_templates:
       - type: mgmtworker_to_manager_configuration
         target: manager_configuration
 
-  amqp_influx:
-    type: manager.nodes.AmqpInfluxBroker
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: python_runtime
-      - type: amqpinflux_to_rabbitmq
-        target: rabbitmq
-      - type: amqpinflux_to_influxdb
-        target: influxdb
-
   webui:
     type: manager.nodes.WebUI
     relationships:
@@ -692,8 +650,6 @@ node_templates:
         target: manager_host
       - type: webui_to_restservice
         target: rest_service
-      - type: webui_to_influxdb
-        target: influxdb
 
   #################################
   # Sanity
@@ -716,19 +672,13 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: logstash
       - type: cloudify.relationships.depends_on
-        target: influxdb
-      - type: cloudify.relationships.depends_on
         target: nginx
-      - type: cloudify.relationships.depends_on
-        target: riemann
       - type: cloudify.relationships.depends_on
         target: rest_service
       - type: cloudify.relationships.depends_on
         target: mgmt_worker
       - type: cloudify.relationships.depends_on
         target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: amqp_influx
 
   ######################################################################
   # Enable this node if you want to have the CLI installed within

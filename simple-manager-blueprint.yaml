@@ -313,30 +313,6 @@ node_templates:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  riemann:
-    type: manager.nodes.Riemann
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: java_runtime
-      - type: riemann_to_manager_configuration
-        target: manager_configuration
-      - type: riemann_to_rabbitmq
-        target: rabbitmq
-      - type: riemann_to_nginx
-        target: nginx
-    interfaces:
-      cloudify.interfaces.validation:
-        creation:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path: components/riemann/scripts/creation_validation.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   rest_service:
     type: manager.nodes.RestService
     relationships:
@@ -417,8 +393,6 @@ node_templates:
         target: logstash
       - type: cloudify.relationships.depends_on
         target: nginx
-      - type: cloudify.relationships.depends_on
-        target: riemann
       - type: cloudify.relationships.depends_on
         target: rest_service
       - type: cloudify.relationships.depends_on

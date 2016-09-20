@@ -47,7 +47,7 @@ def install_logstash():
 
     # Confirm username and password have been supplied for broker before
     # continuing.
-    # Components other than logstash and riemann have this handled in code.
+    # Components other than logstash have this handled in code.
     # Note that these are not directly used in this script, but are used by the
     # deployed resources, hence the check here.
     if not rabbitmq_username or not rabbitmq_password:
