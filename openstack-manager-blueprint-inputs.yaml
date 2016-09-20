@@ -225,7 +225,6 @@ external_network_name: ''
 # https://www.rabbitmq.com/maxlength.html
 #rabbitmq_events_queue_length_limit: 1000000
 #rabbitmq_logs_queue_length_limit: 1000000
-#rabbitmq_metrics_queue_length_limit: 1000000
 
 # RabbitMQ File Descriptors Limit
 #rabbitmq_fd_limit: 102400

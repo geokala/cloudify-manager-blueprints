@@ -254,9 +254,6 @@ node_types:
       rabbitmq_logs_queue_length_limit:
         type: integer
         default: { get_input: rabbitmq_logs_queue_length_limit }
-      rabbitmq_metrics_queue_length_limit:
-        type: integer
-        default: { get_input: rabbitmq_metrics_queue_length_limit }
       rabbitmq_fd_limit:
         description: RabbitMQ File Descriptors Limit
         type: integer
