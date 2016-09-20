@@ -12,13 +12,6 @@
                     "filename": "/var/log/cloudify/webui/backend.log"
                 }
             ]
-        },
-        "influx": {
-            "TODO": "remove this",
-            "host": "127.0.0.1",
-            "user": "root",
-            "pass": "root",
-            "dbname": "cloudify"
         }
     }
 }
