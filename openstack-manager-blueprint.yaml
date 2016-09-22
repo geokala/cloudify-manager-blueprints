@@ -467,20 +467,6 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: manager_resources
 
-  logstash:
-    type: manager.nodes.Logstash
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: manager_host
-      - type: cloudify.relationships.depends_on
-        target: manager_configuration
-      - type: cloudify.relationships.depends_on
-        target: manager_resources
-      - type: cloudify.relationships.depends_on
-        target: java_runtime
-      - type: logstash_to_elasticsearch
-        target: elasticsearch
-
   nginx:
     type: manager.nodes.Nginx
     relationships:
@@ -553,8 +539,6 @@ node_templates:
         target: elasticsearch
       - type: cloudify.relationships.depends_on
         target: postgresql
-      - type: cloudify.relationships.depends_on
-        target: logstash
       - type: cloudify.relationships.depends_on
         target: nginx
       - type: cloudify.relationships.depends_on

@@ -447,58 +447,6 @@ node_types:
             hide_output: *hide_output
             fabric_env: *simple_fabric_env
 
-  manager.nodes.Logstash:
-    derived_from: cloudify.nodes.SoftwareComponent
-    properties:
-      logstash_rpm_source_url:
-        description: Logstash tar.gz Source URL
-        type: string
-        default: { get_input: logstash_source_url }
-      es_endpoint_port:
-        type: integer
-        default: { get_input: elasticsearch_endpoint_port }
-      rabbitmq_endpoint_ip:
-        description: Location of the endpoint. If blank, rabbit will be installed and configured on the manager.
-        type: string
-        default: { get_input: rabbitmq_endpoint_ip }
-      rabbitmq_username:
-        description: RabbitMQ username for access to queues.
-        type: string
-        default: { get_input: rabbitmq_username }
-      rabbitmq_password:
-        description: RabbitMQ password for access to queues.
-        type: string
-        default: { get_input: rabbitmq_password }
-      use_existing_on_upgrade:
-        description: Use existing logstash configuration
-        type: string
-        default: true
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/logstash/scripts/create.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-            ES_ENDPOINT_IP:
-              default: { get_attribute: [elasticsearch, es_endpoint_ip] }
-        start:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/logstash/scripts/start.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-        stop:
-          implementation: fabric.fabric_plugin.tasks.run_script
-          inputs:
-            script_path:
-              default: components/logstash/scripts/stop.py
-            hide_output: *hide_output
-            fabric_env: *simple_fabric_env
-
   manager.nodes.Nginx:
     derived_from: cloudify.nodes.WebServer
     properties:
@@ -890,12 +838,6 @@ node_types:
 # each of the services.
 ######################################################################
 relationships:
-
-  logstash_to_elasticsearch:
-    derived_from: cloudify.relationships.connected_to
-
-  logstash_to_rabbitmq:
-    derived_from: cloudify.relationships.connected_to
 
   restservice_to_elasticsearch:
     derived_from: cloudify.relationships.connected_to

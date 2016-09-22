@@ -192,10 +192,6 @@ inputs:
     type: string
     default: python-psycopg2-2.5.1-3.el7.x86_64.rpm
 
-  logstash_source_url:
-    type: string
-    default: logstash-1.5.0-1.noarch.rpm
-
   nginx_source_url:
     type: string
     default: nginx-1.8.0-1.el7.ngx.x86_64.rpm
@@ -332,7 +328,8 @@ inputs:
     type: string
     default: ''
 
-  # The index for events/logs will be named `logstash-YYYY.mm.dd` and
+  # TODO: This can probably be removed since the logs index is gone
+  # The index for events/logs will be named `l-grepignore-ogstash-YYYY.mm.dd` and
   # A new index corresponding with today's date will be added each day.
   # Elasticsearch Curator is used to rotate the indices on a daily basis
   # via a cronjob.

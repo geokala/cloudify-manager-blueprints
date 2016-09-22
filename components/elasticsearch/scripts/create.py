@@ -157,9 +157,10 @@ def _configure_elasticsearch(host, port):
 
 
 def _configure_index_rotation():
+    # TODO: Probably remove with l-grepignore-ogstash gone
     ctx.logger.info('Configurating index rotation...')
     ctx.logger.debug(
-        'Setting up curator rotation cronjob for logstash-YYYY.mm.dd '
+        'Setting up curator rotation cronjob for l-grepignore-ogstash-YYYY.mm.dd '
         'index patterns...')
     utils.deploy_blueprint_resource(
         'components/elasticsearch/scripts/rotate_es_indices',
