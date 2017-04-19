@@ -35,11 +35,13 @@ function set_manager_ip() {
   echo "Restarting services.."
   # Restarting all (except postgres) to avoid issues with not correctly reloading SSL certs
   systemctl restart nginx
-  systemctl restart cloudify-rabbitmq
   systemctl restart cloudify-amqpinflux
   systemctl restart cloudify-influxdb
-  systemctl restart cloudify-restservice
   systemctl restart cloudify-mgmtworker
+  systemctl restart cloudify-rabbitmq
+  systemctl restart cloudify-restservice
+  systemctl restart cloudify-riemann
+  systemctl restart cloudify-stage
 
   echo "Done!"
 
