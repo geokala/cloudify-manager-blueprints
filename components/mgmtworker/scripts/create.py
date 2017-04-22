@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from os.path import join, dirname
+import tempfile
 
 from cloudify import ctx
 
@@ -16,6 +17,30 @@ ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
 MGMTWORKER_USER = ctx_properties['os_user']
 MGMTWORKER_GROUP = ctx_properties['os_group']
 HOMEDIR = ctx_properties['os_homedir']
+SUDOERS_INCLUDE_DIR = ctx_properties['sudoers_include_dir']
+
+
+def deploy_snapshot_permissions_fixer():
+    rest_props = utils.ctx_factory.get('restservice')
+    ctx.instance.runtime_properties['rest_service_user'] = (
+        rest_props['os_user']
+    )
+    script_name = 'snapshot_permissions_fixer'
+    script_temp_destination = join(tempfile.gettempdir(), script_name)
+    ctx.download_resource_and_render(
+        join('components', 'mgmtworker', 'scripts', script_name),
+        script_temp_destination)
+    remote_script_path = join('/opt/cloudify', script_name)
+    utils.move(script_temp_destination, remote_script_path)
+
+    utils.chmod('550', remote_script_path)
+    utils.chown('root', MGMTWORKER_GROUP, remote_script_path)
+    utils.allow_user_to_sudo_command(
+        user=MGMTWORKER_USER,
+        full_command=remote_script_path,
+        description=script_name,
+        sudoers_include_dir=SUDOERS_INCLUDE_DIR,
+    )
 
 
 def _install_optional(mgmtworker_venv):
@@ -128,3 +153,4 @@ def install_mgmtworker():
 
 
 install_mgmtworker()
+deploy_snapshot_permissions_fixer()

@@ -31,6 +31,7 @@ CONFIG_PATH = "components/mgmtworker/config"
 ctx_properties = utils.ctx_factory.create(MGMT_WORKER_SERVICE_NAME)
 MGMTWORKER_USER = ctx_properties['os_user']
 MGMTWORKER_GROUP = ctx_properties['os_group']
+HOMEDIR = ctx_properties['os_homedir']
 
 
 def configure_mgmtworker():
@@ -46,11 +47,6 @@ def configure_mgmtworker():
 
     ctx.logger.info('Configuring Management worker...')
     # Deploy the broker configuration
-    # TODO: This will break interestingly if mgmtworker_venv is empty.
-    # Some sort of check for that would be sensible.
-    # To sandy: I don't quite understand this check...
-    # there is no else here..
-    # for python_path in ${mgmtworker_venv}/lib/python*; do
     if isfile(join(mgmtworker_venv, 'bin/python')):
         broker_conf_path = join(celery_work_dir, 'broker_config.json')
         utils.deploy_blueprint_resource(
@@ -75,5 +71,18 @@ def configure_logging():
     utils.move(config_file_temp_destination, config_file_destination)
 
 
+def prepare_snapshot_permissions():
+    pgpass_location = '/root/.pgpass'
+    destination = join(HOMEDIR, '.pgpass')
+    utils.chmod('400', pgpass_location)
+    utils.chown(MGMTWORKER_USER, MGMTWORKER_GROUP, pgpass_location)
+    utils.sudo(['mv', pgpass_location, destination])
+    utils.sudo(['chgrp', MGMTWORKER_GROUP, '/opt/manager'])
+    utils.sudo(['chmod', 'g+rw', '/opt/manager'])
+
+    utils.sudo(['/opt/cloudify/snapshot_permissions_fixer'])
+
+
 configure_mgmtworker()
 configure_logging()
+prepare_snapshot_permissions()
